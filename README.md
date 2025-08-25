@@ -1,229 +1,124 @@
-# GH-timeline
+# GitHub Timeline Email Subscription System
 
-This project is a PHP-based email verification system where users register using their email, receive a verification code, and subscribe to GitHub timeline updates. A CRON job fetches the latest GitHub timeline every 5 minutes and sends updates to registered users via email.
+A pure PHP-based email subscription system that allows users to register for GitHub timeline updates, verify their email with a 6-digit code, and unsubscribe securely. Built without external dependencies, following rtCamp's assignment guidelines, using PHP, HTML, CSS, and Mailtrap for email testing.
 
----
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Setup Instructions](#setup-instructions)
+- [Project Workflow](#project-workflow)
+- [File Structure](#file-structure)
+- [rtCamp Guidelines Compliance](#rtcamp-guidelines-compliance)
+- [Challenges and Solutions](#challenges-and-solutions)
+- [Testing](#testing)
+- [License](#license);
 
-## 🚀 Your Task
+## Demo Video
+Watch a quick demo of the project - https://youtu.be/xu7P5X8AfG4?si=11RGNBFWQjW02jCg  
+<!-- *Note*: The video is private; contact the author for access if needed. -->
 
-Your objective is to implement the functionality in the **src/** directory while following these rules:
+## Project Overview
+This project is a web application that lets users subscribe to receive periodic GitHub timeline updates (e.g., Linus Torvalds' public activity) via email. Users register their email, verify it using a 6-digit code sent to their inbox, and can unsubscribe anytime with a similar verification process. Updates are sent every 5 minutes via a CRON job, fetching data from a GitHub Atom feed and formatting it into an HTML table. Emails are stored in a text file, and the system uses Mailtrap for testing email delivery.
 
-✅ **DO NOT** change function names or modify the file structure.  
+The project is built with pure PHP, HTML, and CSS, ensuring no external libraries or frameworks, as per rtCamp's requirements. It’s designed to be simple, scalable, and secure, with clean UI and robust error handling.
 
-✅ **DO NOT** modify anything outside the **src/** folder. You can add additional files if required inside **src** folder. 
+## Features
+- **Email Registration**: Users submit an email, receive a 6-digit verification code, and verify to subscribe.
+- **Unsubscription**: Secure unsubscribe process with email and code verification.
+- **GitHub Timeline Updates**: Fetches public GitHub activity (e.g., `torvalds.atom`) and sends formatted HTML updates every 5 minutes.
+- **Email Storage**: Subscribed emails are stored in `registered_emails.txt` with case-insensitive duplicate checks.
+- **Clean UI**: Responsive forms with modern styling (blue for subscribe, red for unsubscribe).
+- **Error Handling**: Success/error pop-ups, logging for debugging, and secure file operations.
+- **Mailtrap Integration**: Uses Mailtrap SMTP for testing email delivery.
 
-✅ **DO NOT** hardcode emails; use `registered_emails.txt` as the database.  
+## Tech Stack
+- **Backend**: PHP 8.3 (no frameworks)
+- **Frontend**: HTML, CSS (pure, no libraries)
+- **Email Testing**: Mailtrap SMTP
+- **Storage**: Plain text file (`registered_emails.txt`)
+- **CRON Job**: Linux CRON for scheduling updates
+- **Server**: XAMPP (Apache + PHP)
 
-✅ Implement all required functions in `functions.php`.  
+## Setup Instructions
+Follow these steps to set up and run the project locally.
 
-✅ Implement a form in `index.php` to take email input and verify via code.  
+### Prerequisites
+- XAMPP (or any Apache/PHP server) with PHP 8.4+
+- Mailtrap account for SMTP testing
+- Linux environment (e.g., Kali Linux) for CRON setup
+- Git (optional for cloning repo)
 
-✅ Implement a CRON job to send GitHub timeline updates every 5 minutes.  
+### Installation
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-username/github-timeline-isachinpnr.git
+   cd github-timeline-isachinpnr/src
 
-✅ Implement an unsubscribe feature where users can opt out via email verification.
+### Project Workflow
+The project follows a clear workflow for user interaction and backend processing.
 
-✅ Implement `unsubscribe.php` to handle email unsubscription.
+1. Email Registration (index.php):
+User submits email → PHP generates a 6-digit code → Stores email and code in session → Sends code via Mailtrap → Shows "Verification code sent" pop-up.
 
----
-## 📝 Submission Steps [ Non adherence to this will cause disqualification ]
-1. **Clone** the repository to your local machine.  
-2. **Create a new branch** from the `main` branch. **Do not** push code directly to `main`.  
-3. **Implement** the required features inside the `src/` directory.  
-4. **Push** your code to your **branch** (not `main`).  
-5. **Raise a Pull Request (PR) only once** against the `main` branch when all your code is finalized.  
-   - **Do not raise multiple PRs.**  
-   - **Do not add multiple commits to a PR after submission.**  
-6. **Failure to follow these instructions will result in disqualification.**  
-7. **Wait** for your submission to be reviewed. Do not merge the PR.
+User enters code → PHP verifies code against session → Saves email to registered_emails.txt → Shows "Email registered successfully" or "Email already registered" pop-up.
 
----
+2. GitHub Timeline Updates (functions.php + CRON):
+CRON job runs sendGitHubUpdatesToSubscribers() every 5 minutes.
 
-## ⚠️ Important Notes
+Fetches GitHub Atom feed (e.g., torvalds.atom) → Parses XML → Formats into HTML table → Sends to all emails in registered_emails.txt with unsubscribe link.
 
-All form elements should always be visible on the page and should not be conditionally rendered. This ensures the assignment can be tested properly at the appropriate steps.
+3. Unsubscription (unsubscribe.php):
+User submits email → PHP generates and sends a new 6-digit code → Shows "Unsubscribe code sent" pop-up.
 
-Please ensure that if the base repository shows the original template repo, update it so that your repo's main branch is set as the base branch.
+User verifies code → PHP removes email from registered_emails.txt → Shows "You are unsubscribed" or "Email not found" pop-up.
 
-**Recommended PHP version: 8.3**
+4. Storage & Security:
+Emails stored in registered_emails.txt with case-insensitive duplicate checks.
 
----
+Session-based verification ensures secure registration/unsubscription.
 
-## 📌 Features to Implement
+File locking (LOCK_EX) prevents race conditions during file writes.
 
-### 1️⃣ **Email Verification**
-- Users enter their email in a form.
-- A **6-digit numeric code** is generated and emailed to them.
-- Users enter the code in the form to verify and register.
-- Store the verified email in `registered_emails.txt`.
+5. UI & Feedback:
+Responsive forms styled with pure CSS (blue for subscribe, red for unsubscribe).
 
-### 2️⃣ **Unsubscribe Mechanism**
-- Emails should include an **unsubscribe link**.
-- Clicking it will take user to the unsubscribe page.
-- Users enter their email in a form.
-- A **6-digit numeric code** is generated and emailed to them.
-- Users enter the code to confirm unsubscription.
+Success (green) and error (red) pop-ups provide clear user feedback.
 
-### 3️⃣ **GitHub Timeline Fetch**
-- Every 5 minutes, a CRON job should:
-  - Fetch data from `https://www.github.com/timeline`
-  - Format it as **HTML (not JSON)**.
-  - Send it via email to all registered users.
+Logging (error_log()) tracks email sending for debugging.
 
----
+### File Structure
 
-## 📜 File Details & Function Stubs
+github-timeline-isachinpnr/
+├── README.md               # Project documentation
+└── src/
+    ├── index.php           # Registration and verification page
+    ├── unsubscribe.php     # Unsubscription page
+    ├── functions.php       # Core logic (email, GitHub API, file handling)
+    ├── cron.php            # CRON script for periodic updates
+    ├── setup_cron.sh       # Script to set up CRON job
+    └── registered_emails.txt # Stores subscribed emails
 
-You **must** implement the following functions inside `functions.php`:
+## rtCamp Guidelines Compliance
 
-```php
-function generateVerificationCode() {
-    // Generate and return a 6-digit numeric code
-}
+This project adheres to rtCamp's assignment requirements:
+1. Pure PHP: No frameworks or libraries used, only built-in PHP functions (mail(), simplexml_load_string(), etc.).
 
-function registerEmail($email) {
-    $file = __DIR__ . '/registered_emails.txt';
-    // Save verified email to registered_emails.txt
-}
+2. No Dependencies: Entirely self-contained, using plain PHP, HTML, and CSS.
 
-function unsubscribeEmail($email) {
-    $file = __DIR__ . '/registered_emails.txt';
-    // Remove email from registered_emails.txt
-}
+3. Mailtrap for Testing: Emails sent via Mailtrap SMTP to avoid real email delivery.
 
-function sendVerificationEmail($email, $code) {
-    // Send an email containing the verification code
-}
+4. Clean Code: Well-structured, commented, and maintainable code.
 
-function fetchGitHubTimeline() {
-    // Fetch latest data from https://www.github.com/timeline
-}
+5. Responsive UI: CSS ensures forms are user-friendly on desktop and mobile.
 
-function formatGitHubData($data) {
-    // Convert fetched data into formatted HTML
-}
+6. Secure: Session-based verification, file locking, and proper permissions.
 
-function sendGitHubUpdatesToSubscribers() {
-    $file = __DIR__ . '/registered_emails.txt';
-    // Send formatted GitHub timeline to registered users
-}
-```
-## 🔄 CRON Job Implementation
+## License
+This project is for rtCamp assignment purposes and is not licensed for public use. Contact the author for permissions.
 
-📌 You must implement a **CRON job** that runs `cron.php` every 5 minutes.  
-📌 **Do not just write instructions**—provide an actual **setup_cron.sh** script inside `src/`.  
-📌 **Your script should automatically configure the CRON job on execution.**  
+# Author: Sachin Panwar
+# GitHub: @isachinpnr
+# Email:  uttarakhandtechnology@gmail.com
 
----
 
-### 🛠 Required Files
-
-- **`setup_cron.sh`** (Must configure the CRON job)
-- **`cron.php`** (Must handle sending GitHub updates via email)
-
----
-
-### 🚀 How It Should Work
-
-- The `setup_cron.sh` script should register a **CRON job** that executes `cron.php` every 5 minutes.
-- The CRON job **must be automatically added** when the script runs.
-- The `cron.php` file should actually **fetch GitHub timeline data** and **send emails** to registered users.
-
----
-
-## 📩 Email Handling
-
-✅ The email content must be in **HTML format** (not JSON).  
-✅ Use **PHP's `mail()` function** for sending emails.  
-✅ Each email should include an **unsubscribe link**.  
-✅ Unsubscribing should trigger a **confirmation code** before removal.  
-✅ Store emails in `registered_emails.txt` (**Do not use a database**).  
-
----
-
-## ❌ Disqualification Criteria
-
-🚫 **Hardcoding** verification codes.  
-🚫 **Using a database** (use `registered_emails.txt`).  
-🚫 **Modifying anything outside** the `src/` directory.  
-🚫 **Changing function names**.  
-🚫 **Not implementing a working CRON job**.  
-🚫 **Not formatting emails as HTML**.  
-🚫 **Using 3rd party libraries, only pure PHP is allowed**.  
-
----
-## 📌 Input & Button Formatting Guidelines
-
-### 📧 Email Input & Submission Button:
-- The email input field must have `name="email"`.
-- The submit button must have `id="submit-email"`.
-
-#### ✅ Example:
-```html
-<input type="email" name="email" required>
-<button id="submit-email">Submit</button>
-```
----
-### 🔢 Verification Code Input & Submission Button:
-
-- The verification input field must have `name="verification_code"`.  
-- The submit button must have `id="submit-verification"`.  
-
-#### ✅ Example:
-```html
-<input type="text" name="verification_code" maxlength="6" required>
-<button id="submit-verification">Verify</button>
-```
----
-### 🚫 Unsubscribe Email & Submission Button
-- The unsubscribe input field must have `name="unsubscribe_email"`.
-- The submit button must have `id="submit-unsubscribe"`.
-#### ✅ Example:
-```html
-<input type="email" name="unsubscribe_email" required>
-<button id="submit-unsubscribe">Unsubscribe</button>
-```
----
-### 🚫 Unsubscribe Code Input & Submission Button
-- The unsubscribe code input field must have `name="unsubscribe_verification_code"`.
-- The submit button must have `id="verify-unsubscribe"`.
-#### ✅ Example:
-```html
-<input type="text" name="unsubscribe_verification_code">
-<button id="verify-unsubscribe">Verify</button>
-```
----
-
-## 📩 Email Content Guidelines
-
-#### ✅ Verification Email:
-- **Subject:** `Your Verification Code`
-- **Body Format:**
-```html
-<p>Your verification code is: <strong>123456</strong></p>
-```
-- Sender: no-reply@example.com
----
-
-### 📩 Email Content Guidelines
-
-⚠️ Note: The Subject and Body of the email must strictly follow the formats below, including the exact HTML structure.
-
-#### ✅ GitHub Updates Email:
-- **Subject:** `Latest GitHub Updates`
-- **Body Format:**
-```html
-<h2>GitHub Timeline Updates</h2>
-<table border="1">
-  <tr><th>Event</th><th>User</th></tr>
-  <tr><td>Push</td><td>testuser</td></tr>
-</table>
-<p><a href="unsubscribe_url" id="unsubscribe-button">Unsubscribe</a></p>
-```
----
-### ✅ Unsubscribe Confirmation Email:
-- **Subject:** `Confirm Unsubscription`
-- **Body Format:**
-```html
-<p>To confirm unsubscription, use this code: <strong>654321</strong></p>
-```
----
